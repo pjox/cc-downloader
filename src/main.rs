@@ -4,6 +4,7 @@ use crate::cli::Commands;
 
 mod cli;
 mod download;
+mod error;
 
 #[tokio::main]
 async fn main() {
