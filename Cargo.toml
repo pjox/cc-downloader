@@ -2,6 +2,10 @@
 name = "cc-downloader"
 version = "0.1.0"
 edition = "2021"
+authors = ["Pedro Ortiz Suarez <pedro@commoncrawl.org>"]
+description = "A polite and user-friendly downloader for Common Crawl data."
+license = "MIT OR Apache-2.0"
+readme = "README.md"
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
