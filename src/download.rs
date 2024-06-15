@@ -10,7 +10,7 @@ use std::sync::Arc;
 use tokio::io::AsyncWriteExt;
 use tokio::io::BufWriter;
 
-use crate::error::Error;
+use crate::errors::DownloadError;
 
 const BASE_URL: &str = "https://data.commoncrawl.org/";
 
@@ -18,7 +18,7 @@ pub async fn download_paths(
     snapshot: &String,
     data_type: &String,
     output: &PathBuf,
-) -> Result<(), Error> {
+) -> Result<(), DownloadError> {
     let paths = format!("{}crawl-data/{}/{}.paths.gz", BASE_URL, snapshot, data_type);
 
     let url = Url::parse(&paths)?;
@@ -57,7 +57,7 @@ async fn download_task(
     download_url: String,
     multibar: Arc<MultiProgress>,
     output: PathBuf,
-) -> Result<(), Error> {
+) -> Result<(), DownloadError> {
     // Parse URL into Url type
     let url = Url::parse(&download_url)?;
 
@@ -132,7 +132,7 @@ async fn download_task(
     Ok(())
 }
 
-pub async fn download(paths: &PathBuf, output: &PathBuf) -> Result<(), Error> {
+pub async fn download(paths: &PathBuf, output: &PathBuf) -> Result<(), DownloadError> {
     // A vector containing all the URLs to download
 
     let file = {
