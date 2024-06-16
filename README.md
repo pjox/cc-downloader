@@ -12,7 +12,7 @@ This is an experimental polite downloader for Common Crawl data writter in `rust
 
 ## Usage
 
-```bash
+```text
 Usage: cc-downloader [COMMAND]
 
 Commands:
