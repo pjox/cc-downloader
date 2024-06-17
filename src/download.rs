@@ -127,6 +127,8 @@ async fn download_task(
     // Finish the progress bar to prevent glitches
     progress_bar.finish();
 
+    multibar.remove(&progress_bar);
+
     // Must flush tokio::io::BufWriter manually.
     // It will *not* flush itself automatically when dropped.
     outfile.flush().await?;
