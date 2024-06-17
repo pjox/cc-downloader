@@ -9,6 +9,7 @@ This is an experimental polite downloader for Common Crawl data writter in `rust
 - [ ] Add tests
 - [ ] Refactor CLI subcommands
 - [ ] Add support for `s3`
+- [ ] Simplify CLI interface
 
 ## Usage
 
