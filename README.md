@@ -26,7 +26,7 @@ Options:
 
 ------
 
-cc-downloader download -h                                                             
+cc-downloader download -h
 Download files from a crawl
 
 Usage: cc-downloader download --path-file <PATHS> --output <OUTPUT> [PROGRESS]
@@ -41,7 +41,7 @@ Options:
 
 ------
 
-cc-downloader download-paths -h                                                               
+cc-downloader download-paths -h
 Download paths for a given snapshot
 
 Usage: cc-downloader download-paths --snapshot <SNAPSHOT> --data-type <PATHS> --output <OUTPUT> [PROGRESS]

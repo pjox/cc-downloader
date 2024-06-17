@@ -2,6 +2,8 @@ use flate2::read::GzDecoder;
 use futures::{stream, StreamExt};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use reqwest::{header, Client, Url};
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
@@ -53,7 +55,7 @@ pub async fn download_paths(
 // Based on: https://github.com/benkay86/async-applied/blob/master/indicatif-reqwest-tokio/src/bin/indicatif-reqwest-tokio-multi.rs
 
 async fn download_task(
-    client: Client,
+    client: ClientWithMiddleware,
     download_url: String,
     multibar: Arc<MultiProgress>,
     output: PathBuf,
@@ -172,8 +174,13 @@ pub async fn download(paths: &PathBuf, output: &PathBuf) -> Result<(), DownloadE
     // This is basically a async compatible iterator
     let stream = stream::iter(paths);
 
-    // Create a reqwest Client
-    let client = Client::new();
+    // Create a reqwest Client with a retry policy of 50 retries
+    // The minimum delay for a retry is 1s
+
+    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(50);
+    let client = ClientBuilder::new(reqwest::Client::new())
+        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+        .build();
 
     // Set up a future to iterate over tasks and run up to 2 at a time.
     let tasks = stream
