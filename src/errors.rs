@@ -3,6 +3,7 @@ use std::fmt;
 #[derive(Debug)]
 pub enum DownloadError {
     Reqwest(reqwest::Error),
+    ReqwestMiddleware(reqwest_middleware::Error),
     Tokio(tokio::io::Error),
     Url(url::ParseError),
     Indicatif(indicatif::style::TemplateError),
@@ -14,6 +15,7 @@ impl fmt::Display for DownloadError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             DownloadError::Reqwest(ref err) => err.fmt(f),
+            DownloadError::ReqwestMiddleware(ref err) => err.fmt(f),
             DownloadError::Tokio(ref err) => err.fmt(f),
             DownloadError::Url(ref err) => err.fmt(f),
             DownloadError::Indicatif(ref err) => err.fmt(f),
@@ -26,6 +28,12 @@ impl fmt::Display for DownloadError {
 impl From<reqwest::Error> for DownloadError {
     fn from(err: reqwest::Error) -> Self {
         DownloadError::Reqwest(err)
+    }
+}
+
+impl From<reqwest_middleware::Error> for DownloadError {
+    fn from(err: reqwest_middleware::Error) -> Self {
+        DownloadError::ReqwestMiddleware(err)
     }
 }
 
