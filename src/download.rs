@@ -57,8 +57,10 @@ pub async fn download_paths(
 async fn download_task(
     client: ClientWithMiddleware,
     download_url: String,
+    number: usize,
     multibar: Arc<MultiProgress>,
     output: PathBuf,
+    numbered: bool,
 ) -> Result<(), DownloadError> {
     // Parse URL into Url type
     let url = Url::parse(&download_url)?;
@@ -82,10 +84,13 @@ async fn download_task(
     };
 
     // Parse the filename from the given URL
-    let filename = url
-        .path_segments() // Splits into segments of the URL
-        .and_then(|segments| segments.last()) // Retrieves the last segment
-        .unwrap_or("file.download"); // Fallback to generic filename
+    let filename: &str = match numbered {
+        true => &format!("{}{}", number.to_string(), ".txt.gz"),
+        false => url
+            .path_segments() // Splits into segments of the URL
+            .and_then(|segments| segments.last()) // Retrieves the last segment
+            .unwrap_or("file.download"), // Fallback to generic filename
+    };
 
     let mut dst = output.clone();
 
@@ -127,6 +132,7 @@ async fn download_task(
     // Finish the progress bar to prevent glitches
     progress_bar.finish();
 
+    // Remove the progress bar from the multibar
     multibar.remove(&progress_bar);
 
     // Must flush tokio::io::BufWriter manually.
@@ -136,7 +142,11 @@ async fn download_task(
     Ok(())
 }
 
-pub async fn download(paths: &PathBuf, output: &PathBuf) -> Result<(), DownloadError> {
+pub async fn download(
+    paths: &PathBuf,
+    output: &PathBuf,
+    numbered: &bool,
+) -> Result<(), DownloadError> {
     // A vector containing all the URLs to download
 
     let file = {
@@ -187,18 +197,25 @@ pub async fn download(paths: &PathBuf, output: &PathBuf) -> Result<(), DownloadE
     // Set up a future to iterate over tasks and run up to 2 at a time.
     let tasks = stream
         .enumerate()
-        .for_each_concurrent(Some(15), |(_i, download_link)| {
+        .for_each_concurrent(Some(15), |(number, download_link)| {
             // Clone multibar and main_pb.  We will move the clones into each task.
             let multibar = multibar.clone();
             let main_pb = main_pb.clone();
             let client = client.clone();
             let output = output.clone();
+            let numbered = numbered.clone();
             async move {
                 // Spawn a new tokio task for the current download link
                 // We need to hand over the multibar, so the ProgressBar for the task can be added
-                let _task =
-                    tokio::task::spawn(download_task(client, download_link, multibar, output))
-                        .await;
+                let _task = tokio::task::spawn(download_task(
+                    client,
+                    download_link,
+                    number,
+                    multibar,
+                    output,
+                    numbered,
+                ))
+                .await;
 
                 // Increase main ProgressBar by 1
                 main_pb.inc(1);
