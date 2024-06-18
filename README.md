@@ -4,7 +4,7 @@ This is an experimental polite downloader for Common Crawl data writter in `rust
 
 ## Todo
 
-- [ ] Add retry support
+- [x] Add retry support
 - [ ] Add Python bindings
 - [ ] Add tests
 - [ ] Refactor CLI subcommands
@@ -42,17 +42,17 @@ Options:
 
 ------
 
-cc-downloader download-paths -h
-Download paths for a given snapshot
+cc-downloader download -h                                                                
+Download files from a crawl
 
-Usage: cc-downloader download-paths --snapshot <SNAPSHOT> --data-type <PATHS> --output <OUTPUT> [PROGRESS]
+Usage: cc-downloader download [OPTIONS] --path-file <PATHS> --output <OUTPUT> [PROGRESS]
 
 Arguments:
   [PROGRESS]  Print progress #[arg(short, long)] [possible values: true, false]
 
 Options:
-      --snapshot <SNAPSHOT>  Crawl reference
-      --data-type <PATHS>    Data type
-  -o, --output <OUTPUT>      Otput folder
-  -h, --help                 Print help
+      --path-file <PATHS>  Path file
+  -o, --output <OUTPUT>    Otput folder
+  -n, --numbered           Numbered output
+  -h, --help               Print help
 ```
