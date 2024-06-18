@@ -40,6 +40,10 @@ pub enum Commands {
         #[arg(short, long, value_name = "OUTPUT")]
         output: PathBuf,
 
+        /// Numbered output
+        #[arg(short, long)]
+        numbered: bool,
+
         /// Print progress
         /// #[arg(short, long)]
         progress: Option<bool>,
