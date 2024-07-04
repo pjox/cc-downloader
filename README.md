@@ -42,17 +42,17 @@ Options:
 
 ------
 
-cc-downloader download -h                                                                
-Download files from a crawl
+cc-downloader download-paths -h
+Download paths for a given snapshot
 
-Usage: cc-downloader download [OPTIONS] --path-file <PATHS> --output <OUTPUT> [PROGRESS]
+Usage: cc-downloader download-paths <SNAPSHOT> <PATHS> <DESTINATION> [PROGRESS]
 
 Arguments:
-  [PROGRESS]  Print progress #[arg(short, long)] [possible values: true, false]
+  <SNAPSHOT>     Crawl reference, e.g. CC-MAIN-2021-04
+  <PATHS>        Data type
+  <DESTINATION>  Destination folder
+  [PROGRESS]     Print progress [possible values: true, false]
 
 Options:
-      --path-file <PATHS>  Path file
-  -o, --output <OUTPUT>    Otput folder
-  -n, --numbered           Numbered output
-  -h, --help               Print help
+  -h, --help  Print help
 ```
