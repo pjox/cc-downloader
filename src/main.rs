@@ -14,21 +14,21 @@ async fn main() {
         Some(Commands::DownloadPaths {
             snapshot,
             data_type,
-            output,
+            dst,
             progress: _,
         }) => {
-            download::download_paths(snapshot, data_type, output)
+            download::download_paths(snapshot, data_type, dst)
                 .await
                 .expect("Error downloading paths");
             println!("Downloading paths: ",);
         }
         Some(Commands::Download {
             path_file,
-            output,
+            dst,
             progress: _,
             numbered,
         }) => {
-            download::download(path_file, output, numbered)
+            download::download(path_file, dst, numbered)
                 .await
                 .expect("Error downloading files");
             println!("Downloading paths: ",);

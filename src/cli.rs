@@ -21,9 +21,9 @@ pub enum Commands {
         #[arg(long, value_name = "PATHS")]
         data_type: String,
 
-        /// Otput folder
-        #[arg(short, long, value_name = "OUTPUT")]
-        output: PathBuf,
+        /// Destination folder
+        #[arg(short, long, value_name = "DESTINATION")]
+        dst: PathBuf,
 
         /// Print progress
         /// #[arg(short, long)]
@@ -33,19 +33,18 @@ pub enum Commands {
     /// Download files from a crawl
     Download {
         /// Path file
-        #[arg(long, value_name = "PATHS")]
+        #[arg(value_name = "PATHS")]
         path_file: PathBuf,
 
-        /// Otput folder
-        #[arg(short, long, value_name = "OUTPUT")]
-        output: PathBuf,
+        /// Destination folder
+        #[arg(value_name = "DESTINATION")]
+        dst: PathBuf,
 
         /// Numbered output
         #[arg(short, long)]
         numbered: bool,
 
         /// Print progress
-        /// #[arg(short, long)]
         progress: Option<bool>,
     },
 }

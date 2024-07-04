@@ -19,7 +19,7 @@ const BASE_URL: &str = "https://data.commoncrawl.org/";
 pub async fn download_paths(
     snapshot: &String,
     data_type: &String,
-    output: &PathBuf,
+    dst: &PathBuf,
 ) -> Result<(), DownloadError> {
     let paths = format!("{}crawl-data/{}/{}.paths.gz", BASE_URL, snapshot, data_type);
 
@@ -34,7 +34,7 @@ pub async fn download_paths(
 
     let request = client.get(url.as_str());
 
-    let mut dst = output.clone();
+    let mut dst = dst.clone();
 
     dst.push(filename);
 
@@ -59,7 +59,7 @@ async fn download_task(
     download_url: String,
     number: usize,
     multibar: Arc<MultiProgress>,
-    output: PathBuf,
+    dst: PathBuf,
     numbered: bool,
 ) -> Result<(), DownloadError> {
     // Parse URL into Url type
@@ -92,7 +92,7 @@ async fn download_task(
             .unwrap_or("file.download"), // Fallback to generic filename
     };
 
-    let mut dst = output.clone();
+    let mut dst = dst.clone();
 
     dst.push(filename);
 
@@ -144,7 +144,7 @@ async fn download_task(
 
 pub async fn download(
     paths: &PathBuf,
-    output: &PathBuf,
+    dst: &PathBuf,
     numbered: &bool,
 ) -> Result<(), DownloadError> {
     // A vector containing all the URLs to download
@@ -202,7 +202,7 @@ pub async fn download(
             let multibar = multibar.clone();
             let main_pb = main_pb.clone();
             let client = client.clone();
-            let output = output.clone();
+            let dst = dst.clone();
             let numbered = numbered.clone();
             async move {
                 // Spawn a new tokio task for the current download link
@@ -212,7 +212,7 @@ pub async fn download(
                     download_link,
                     number,
                     multibar,
-                    output,
+                    dst,
                     numbered,
                 ))
                 .await;
