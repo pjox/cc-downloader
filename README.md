@@ -29,15 +29,16 @@ Options:
 cc-downloader download -h
 Download files from a crawl
 
-Usage: cc-downloader download --path-file <PATHS> --output <OUTPUT> [PROGRESS]
+Usage: cc-downloader download [OPTIONS] <PATHS> <DESTINATION> [PROGRESS]
 
 Arguments:
-  [PROGRESS]  Print progress #[arg(short, long)] [possible values: true, false]
+  <PATHS>        Path file
+  <DESTINATION>  Destination folder
+  [PROGRESS]     Print progress [possible values: true, false]
 
 Options:
-      --path-file <PATHS>  Path file
-  -o, --output <OUTPUT>    Otput folder
-  -h, --help               Print help
+  -n, --numbered  Enumerate output files for compatibility with Ungoliant Pipeline
+  -h, --help      Print help
 
 ------
 

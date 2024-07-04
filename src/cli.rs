@@ -13,20 +13,19 @@ pub struct Cli {
 pub enum Commands {
     /// Download paths for a given snapshot
     DownloadPaths {
-        /// Crawl reference
-        #[arg(long, value_name = "SNAPSHOT")]
+        /// Crawl reference, e.g. CC-MAIN-2021-04
+        #[arg(value_name = "SNAPSHOT")]
         snapshot: String,
 
         /// Data type
-        #[arg(long, value_name = "PATHS")]
+        #[arg(value_name = "PATHS")]
         data_type: String,
 
         /// Destination folder
-        #[arg(short, long, value_name = "DESTINATION")]
+        #[arg(value_name = "DESTINATION")]
         dst: PathBuf,
 
         /// Print progress
-        /// #[arg(short, long)]
         progress: Option<bool>,
     },
 
@@ -40,7 +39,7 @@ pub enum Commands {
         #[arg(value_name = "DESTINATION")]
         dst: PathBuf,
 
-        /// Numbered output
+        /// Enumerate output files for compatibility with Ungoliant Pipeline
         #[arg(short, long)]
         numbered: bool,
 
