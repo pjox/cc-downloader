@@ -17,7 +17,7 @@ async fn main() {
             dst,
             progress: _,
         }) => {
-            download::download_paths(snapshot, data_type, dst)
+            download::download_paths(snapshot, data_type.as_str(), dst)
                 .await
                 .expect("Error downloading paths");
             println!("Downloading paths: ",);
@@ -26,9 +26,10 @@ async fn main() {
             path_file,
             dst,
             progress: _,
+            threads,
             numbered,
         }) => {
-            download::download(path_file, dst, numbered)
+            download::download(path_file, dst, *threads, numbered)
                 .await
                 .expect("Error downloading files");
             println!("Downloading paths: ",);

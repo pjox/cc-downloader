@@ -1,5 +1,4 @@
 use flate2::read::GzDecoder;
-use futures::{stream, StreamExt};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use reqwest::{header, Client, Url};
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
@@ -11,6 +10,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::io::AsyncWriteExt;
 use tokio::io::BufWriter;
+use tokio::sync::Semaphore;
+use tokio::task::JoinSet;
 
 use crate::errors::DownloadError;
 
@@ -18,7 +19,7 @@ const BASE_URL: &str = "https://data.commoncrawl.org/";
 
 pub async fn download_paths(
     snapshot: &String,
-    data_type: &String,
+    data_type: &str,
     dst: &PathBuf,
 ) -> Result<(), DownloadError> {
     let paths = format!("{}crawl-data/{}/{}.paths.gz", BASE_URL, snapshot, data_type);
@@ -145,6 +146,7 @@ async fn download_task(
 pub async fn download(
     paths: &PathBuf,
     dst: &PathBuf,
+    threads: usize,
     numbered: &bool,
 ) -> Result<(), DownloadError> {
     // A vector containing all the URLs to download
@@ -155,12 +157,13 @@ pub async fn download(
         BufReader::new(file_decoded)
     };
 
-    let paths: Vec<String> = file
+    let paths: Vec<(usize, String)> = file
         .lines()
         .map(|line| {
             let line = line.unwrap();
             format!("{}{}", BASE_URL, line)
         })
+        .enumerate()
         .collect();
 
     // Set up a new multi-progress bar.
@@ -182,45 +185,29 @@ pub async fn download(
     // first task to finish.
     main_pb.tick();
 
-    // Convert download_links Vector into stream
-    // This is basically a async compatible iterator
-    let stream = stream::iter(paths);
-
-    // Create a reqwest Client with a retry policy of 50 retries
-    // The minimum delay for a retry is 1s
-
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(50);
     let client = ClientBuilder::new(reqwest::Client::new())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
 
-    // Set up a future to iterate over tasks and run up to 2 at a time.
-    let tasks = stream
-        .enumerate()
-        .for_each_concurrent(Some(15), |(number, download_link)| {
-            // Clone multibar and main_pb.  We will move the clones into each task.
-            let multibar = multibar.clone();
-            let main_pb = main_pb.clone();
-            let client = client.clone();
-            let dst = dst.clone();
-            let numbered = numbered.clone();
-            async move {
-                // Spawn a new tokio task for the current download link
-                // We need to hand over the multibar, so the ProgressBar for the task can be added
-                let _task = tokio::task::spawn(download_task(
-                    client,
-                    download_link,
-                    number,
-                    multibar,
-                    dst,
-                    numbered,
-                ))
-                .await;
+    let semaphore = Arc::new(Semaphore::new(threads));
+    let mut set = JoinSet::new();
 
-                // Increase main ProgressBar by 1
-                main_pb.inc(1);
-            }
+    for (number, path) in paths {
+        // Clone multibar and main_pb.  We will move the clones into each task.
+        let multibar = multibar.clone();
+        let main_pb = main_pb.clone();
+        let client = client.clone();
+        let dst = dst.clone();
+        let numbered = numbered.clone();
+        let semaphore = semaphore.clone();
+        set.spawn(async move {
+            let _permit = semaphore.acquire().await;
+            let res = download_task(client, path, number, multibar, dst, numbered).await;
+            main_pb.inc(1);
+            res
         });
+    }
 
     // Set up a future to manage rendering of the multiple progress bars.
     let multibar = {
@@ -234,7 +221,13 @@ pub async fn download(
     };
 
     // Wait for the tasks to finish.
-    tasks.await;
+    while let Some(result) = set.join_next().await {
+        match result {
+            Ok(Ok(())) => {}
+            Ok(Err(e)) => eprintln!("Error: {:?}", e),
+            Err(e) => eprintln!("Error: {:?}", e),
+        }
+    }
 
     // Change the message on the overall progress indicator.
     main_pb.finish_with_message("done");

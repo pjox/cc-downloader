@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -19,7 +19,7 @@ pub enum Commands {
 
         /// Data type
         #[arg(value_name = "PATHS")]
-        data_type: String,
+        data_type: DataType,
 
         /// Destination folder
         #[arg(value_name = "DESTINATION")]
@@ -43,7 +43,38 @@ pub enum Commands {
         #[arg(short, long)]
         numbered: bool,
 
+        /// Number of threads to use
+        #[arg(short, long, default_value = "10", value_name = "NUMBER OF THREADS")]
+        threads: usize,
+
         /// Print progress
         progress: Option<bool>,
     },
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+pub enum DataType {
+    Segment,
+    Warc,
+    Wat,
+    Wet,
+    Robotstxt,
+    Non200responses,
+    CcIndex,
+    CcIndexTable,
+}
+
+impl DataType {
+    pub fn as_str(&self) -> &str {
+        match self {
+            DataType::Segment => "segment",
+            DataType::Warc => "warc",
+            DataType::Wat => "wat",
+            DataType::Wet => "wet",
+            DataType::Robotstxt => "robotstxt",
+            DataType::Non200responses => "non200responses",
+            DataType::CcIndex => "cc-index",
+            DataType::CcIndexTable => "cc-index-table",
+        }
+    }
 }
