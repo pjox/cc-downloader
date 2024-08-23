@@ -189,7 +189,7 @@ pub async fn download(
     main_pb.tick();
 
     let retry_policy = ExponentialBackoff::builder()
-        .retry_bounds(Duration::from_secs(1), Duration::from_secs(60))
+        .retry_bounds(Duration::from_secs(1), Duration::from_secs(3600))
         .jitter(Jitter::Bounded)
         .base(2)
         .build_with_max_retries(1000);
