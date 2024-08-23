@@ -2,12 +2,15 @@ use flate2::read::GzDecoder;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use reqwest::{header, Client, Url};
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_retry::policies::ExponentialBackoff;
+use reqwest_retry::Jitter;
+use reqwest_retry::RetryTransientMiddleware;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::io::AsyncWriteExt;
 use tokio::io::BufWriter;
 use tokio::sync::Semaphore;
@@ -185,7 +188,12 @@ pub async fn download(
     // first task to finish.
     main_pb.tick();
 
-    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(1000);
+    let retry_policy = ExponentialBackoff::builder()
+        .retry_bounds(Duration::from_secs(1), Duration::from_secs(60))
+        .jitter(Jitter::Bounded)
+        .base(2)
+        .build_with_max_retries(1000);
+
     let client = ClientBuilder::new(reqwest::Client::new())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
