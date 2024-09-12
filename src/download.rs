@@ -150,6 +150,7 @@ pub async fn download(
     paths: &PathBuf,
     dst: &PathBuf,
     threads: usize,
+    max_retries: usize,
     numbered: &bool,
 ) -> Result<(), DownloadError> {
     // A vector containing all the URLs to download
@@ -192,7 +193,7 @@ pub async fn download(
         .retry_bounds(Duration::from_secs(1), Duration::from_secs(3600))
         .jitter(Jitter::Bounded)
         .base(2)
-        .build_with_max_retries(1000);
+        .build_with_max_retries(u32::try_from(max_retries).unwrap());
 
     let client = ClientBuilder::new(reqwest::Client::new())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))

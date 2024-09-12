@@ -27,9 +27,10 @@ async fn main() {
             dst,
             progress: _,
             threads,
+            retries,
             numbered,
         }) => {
-            download::download(path_file, dst, *threads, numbered)
+            download::download(path_file, dst, *threads, *retries, numbered)
                 .await
                 .expect("Error downloading files");
             println!("Downloading paths: ",);

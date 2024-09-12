@@ -47,6 +47,15 @@ pub enum Commands {
         #[arg(short, long, default_value = "10", value_name = "NUMBER OF THREADS")]
         threads: usize,
 
+        /// Maximum number of retries per file
+        #[arg(
+            short,
+            long,
+            default_value = "1000",
+            value_name = "MAX RETRIES PER FILE"
+        )]
+        retries: usize,
+
         /// Print progress
         progress: Option<bool>,
     },
