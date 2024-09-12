@@ -57,9 +57,10 @@ Arguments:
   [PROGRESS]     Print progress [possible values: true, false]
 
 Options:
-  -n, --numbered                     Enumerate output files for compatibility with Ungoliant Pipeline
-  -t, --threads <NUMBER OF THREADS>  Number of threads to use [default: 10]
-  -h, --help                         Print help
+  -n, --numbered                        Enumerate output files for compatibility with Ungoliant Pipeline
+  -t, --threads <NUMBER OF THREADS>     Number of threads to use [default: 10]
+  -r, --retries <MAX RETRIES PER FILE>  Maximum number of retries per file [default: 1000]
+  -h, --help                            Print help
 ```
 
 ## Number of threads
