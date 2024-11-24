@@ -15,7 +15,6 @@ async fn main() {
             snapshot,
             data_type,
             dst,
-            progress: _,
         }) => {
             download::download_paths(snapshot, data_type.as_str(), dst)
                 .await

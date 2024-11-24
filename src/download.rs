@@ -26,7 +26,7 @@ pub async fn download_paths(
     dst: &PathBuf,
 ) -> Result<(), DownloadError> {
     let paths = format!("{}crawl-data/{}/{}.paths.gz", BASE_URL, snapshot, data_type);
-
+    println!("Downloading paths from: {}", paths);
     let url = Url::parse(&paths)?;
 
     let client = Client::new();

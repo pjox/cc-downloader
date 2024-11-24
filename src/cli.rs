@@ -24,9 +24,6 @@ pub enum Commands {
         /// Destination folder
         #[arg(value_name = "DESTINATION")]
         dst: PathBuf,
-
-        /// Print progress
-        progress: Option<bool>,
     },
 
     /// Download files from a crawl
