@@ -60,7 +60,7 @@ pub async fn download_paths(
 
 // Based on: https://github.com/benkay86/async-applied/blob/master/indicatif-reqwest-tokio/src/bin/indicatif-reqwest-tokio-multi.rs
 
-async fn download_task(
+async fn download_task_with_progress(
     client: ClientWithMiddleware,
     download_url: String,
     number: usize,
@@ -148,7 +148,7 @@ async fn download_task(
     Ok(())
 }
 
-pub async fn download(
+pub async fn download_with_progress(
     paths: &PathBuf,
     dst: &PathBuf,
     threads: usize,
@@ -214,7 +214,8 @@ pub async fn download(
         let semaphore = semaphore.clone();
         set.spawn(async move {
             let _permit = semaphore.acquire().await;
-            let res = download_task(client, path, number, multibar, dst, numbered).await;
+            let res =
+                download_task_with_progress(client, path, number, multibar, dst, numbered).await;
             main_pb.inc(1);
             res
         });
@@ -248,5 +249,120 @@ pub async fn download(
     // future spawned by tokio::task::spawn_blocking to finish.
     // The second ? unwraps the inner multibar.join().
     multibar.await?;
+    Ok(())
+}
+
+async fn download_task(
+    client: ClientWithMiddleware,
+    download_url: String,
+    number: usize,
+    dst: PathBuf,
+    numbered: bool,
+) -> Result<(), DownloadError> {
+    // Parse URL into Url type
+    let url = Url::parse(&download_url)?;
+
+    // Parse the filename from the given URL
+    let filename: &str = match numbered {
+        true => &format!("{}{}", number.to_string(), ".txt.gz"),
+        false => url
+            .path_segments() // Splits into segments of the URL
+            .and_then(|segments| segments.last()) // Retrieves the last segment
+            .unwrap_or("file.download"), // Fallback to generic filename
+    };
+
+    let mut dst = dst.clone();
+
+    dst.push(filename);
+
+    println!("Downloading: {}", url.as_str());
+
+    // Here we build the actual Request with a RequestBuilder from the Client
+    let request = client.get(url.as_str());
+
+    // Create the output file with tokio's async fs lib
+    let outfile = tokio::fs::File::create(dst.clone()).await?;
+    let mut outfile = BufWriter::new(outfile);
+
+    // Do the actual request to download the file
+    let mut download = request.send().await?;
+
+    // Do an asynchronous, buffered copy of the download to the output file.
+    //
+    // We use the part from the reqwest-tokio example here on purpose
+    // This way, we are able to increase the ProgressBar with every downloaded chunk
+    while let Some(chunk) = download.chunk().await? {
+        outfile.write(&chunk).await?; // Write chunk to output file
+    }
+
+    // Must flush tokio::io::BufWriter manually.
+    // It will *not* flush itself automatically when dropped.
+    outfile.flush().await?;
+
+    println!("Downloaded file to: {}", dst.to_str().unwrap());
+
+    Ok(())
+}
+
+pub async fn download(
+    paths: &PathBuf,
+    dst: &PathBuf,
+    threads: usize,
+    max_retries: usize,
+    numbered: &bool,
+) -> Result<(), DownloadError> {
+    // A vector containing all the URLs to download
+
+    let file = {
+        let gzip_file = File::open(paths)?;
+        let file_decoded = GzDecoder::new(gzip_file);
+        BufReader::new(file_decoded)
+    };
+
+    let paths: Vec<(usize, String)> = file
+        .lines()
+        .map(|line| {
+            let line = line.unwrap();
+            format!("{}{}", BASE_URL, line)
+        })
+        .enumerate()
+        .collect();
+
+    let retry_policy = ExponentialBackoff::builder()
+        .retry_bounds(Duration::from_secs(1), Duration::from_secs(3600))
+        .jitter(Jitter::Bounded)
+        .base(2)
+        .build_with_max_retries(u32::try_from(max_retries).unwrap());
+
+    let client = ClientBuilder::new(reqwest::Client::new())
+        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+        .build();
+
+    let semaphore = Arc::new(Semaphore::new(threads));
+    let mut set = JoinSet::new();
+
+    for (number, path) in paths {
+        let client = client.clone();
+        let dst = dst.clone();
+        let numbered = numbered.clone();
+        let semaphore = semaphore.clone();
+        set.spawn(async move {
+            let _permit = semaphore.acquire().await;
+            let res = download_task(client, path, number, dst, numbered).await;
+            res
+        });
+    }
+
+    // Wait for the tasks to finish.
+    while let Some(result) = set.join_next().await {
+        match result {
+            Ok(Ok(())) => {}
+            Ok(Err(e)) => eprintln!("Error: {:?}", e),
+            Err(e) => eprintln!("Error: {:?}", e),
+        }
+    }
+
+    println!("All downloads completed");
+
     Ok(())
 }

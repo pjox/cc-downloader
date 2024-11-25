@@ -54,7 +54,8 @@ pub enum Commands {
         retries: usize,
 
         /// Print progress
-        progress: Option<bool>,
+        #[arg(short, long, action)]
+        progress: bool,
     },
 }
 

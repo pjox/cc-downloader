@@ -23,15 +23,23 @@ async fn main() {
         Some(Commands::Download {
             path_file,
             dst,
-            progress: _,
+            progress,
             threads,
             retries,
             numbered,
-        }) => {
-            download::download(path_file, dst, *threads, *retries, numbered)
-                .await
-                .expect("Error downloading files");
-        }
+        }) => match progress {
+            true => {
+                download::download_with_progress(path_file, dst, *threads, *retries, numbered)
+                    .await
+                    .expect("Error downloading files");
+                return;
+            }
+            false => {
+                download::download(path_file, dst, *threads, *retries, numbered)
+                    .await
+                    .expect("Error downloading files");
+            }
+        },
         None => {
             println!("No command specified");
         }
