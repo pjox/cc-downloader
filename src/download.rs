@@ -42,7 +42,7 @@ pub async fn download_paths(
 
     dst.push(filename);
 
-    let outfile = tokio::fs::File::create(dst).await?;
+    let outfile = tokio::fs::File::create(dst.clone()).await?;
     let mut outfile = BufWriter::new(outfile);
 
     let mut download = request.send().await?;
@@ -52,6 +52,8 @@ pub async fn download_paths(
     }
 
     outfile.flush().await?;
+
+    println!("Downloaded paths to: {}", dst.to_str().unwrap());
 
     Ok(())
 }

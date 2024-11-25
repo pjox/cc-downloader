@@ -19,7 +19,6 @@ async fn main() {
             download::download_paths(snapshot, data_type.as_str(), dst)
                 .await
                 .expect("Error downloading paths");
-            println!("Downloading paths: ",);
         }
         Some(Commands::Download {
             path_file,
@@ -32,7 +31,6 @@ async fn main() {
             download::download(path_file, dst, *threads, *retries, numbered)
                 .await
                 .expect("Error downloading files");
-            println!("Downloading paths: ",);
         }
         None => {
             println!("No command specified");
