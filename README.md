@@ -7,6 +7,18 @@ This is an experimental polite downloader for Common Crawl data writter in `rust
 - [ ] Add Python bindings
 - [ ] Add tests
 - [ ] Handle unrecoverable errors
+- [ ] Handle tree structure for indexes
+- [ ] Crosscompile and release binaries
+
+## Installation
+
+For now, the only supported way to install the tool is to use `cargo`. For this you need to have `rust` installed. You can install `rust` by following the instructions on the [official website](https://www.rust-lang.org/tools/install).
+
+After installing `rust`, ``cc-downloader`` can be installed with the following command:
+
+```bash
+cargo install cc-downloader
+```
 
 ## Usage
 
