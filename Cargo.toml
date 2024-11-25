@@ -6,6 +6,9 @@ authors = ["Pedro Ortiz Suarez <pedro@commoncrawl.org>"]
 description = "A polite and user-friendly downloader for Common Crawl data."
 license = "MIT OR Apache-2.0"
 readme = "README.md"
+homepage = "https://commoncrawl.org"
+repository = "https://github.com/pjox/cc-downloader"
+documentation = "https://docs.rs/cc-downloader"
 
 [dependencies]
 clap = { version = "4.5.21", features = ["derive"] }

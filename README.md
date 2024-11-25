@@ -4,12 +4,9 @@ This is an experimental polite downloader for Common Crawl data writter in `rust
 
 ## Todo
 
-- [x] Add retry support
 - [ ] Add Python bindings
 - [ ] Add tests
-- [ ] Refactor CLI subcommands
-- [ ] Simplify CLI interface
-- [ ] Add a method to download failed files
+- [ ] Handle unrecoverable errors
 
 ## Usage
 
