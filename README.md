@@ -7,7 +7,6 @@ This is an experimental polite downloader for Common Crawl data writter in `rust
 - [ ] Add Python bindings
 - [ ] Add tests
 - [ ] Handle unrecoverable errors
-- [ ] Handle tree structure for indexes
 - [ ] Crosscompile and release binaries
 
 ## Installation
@@ -23,7 +22,7 @@ cargo install cc-downloader
 ## Usage
 
 ```text
-cc-downloader -h                                                  
+➜ ./target/release/cc-downloader -h                                                                               
 A polite and user-friendly downloader for Common Crawl data.
 
 Usage: cc-downloader [COMMAND]
@@ -39,36 +38,35 @@ Options:
 
 ------
 
-cc-downloader download-paths -h                                   
+➜ ./target/release/cc-downloader download-paths -h
 Download paths for a given snapshot
 
-Usage: cc-downloader download-paths <SNAPSHOT> <PATHS> <DESTINATION> [PROGRESS]
+Usage: cc-downloader download-paths <SNAPSHOT> <PATHS> <DESTINATION>
 
 Arguments:
   <SNAPSHOT>     Crawl reference, e.g. CC-MAIN-2021-04
   <PATHS>        Data type [possible values: segment, warc, wat, wet, robotstxt, non200responses, cc-index, cc-index-table]
   <DESTINATION>  Destination folder
-  [PROGRESS]     Print progress [possible values: true, false]
 
 Options:
   -h, --help  Print help
-
 ------
 
-cc-downloader download -h                                         
+➜ ./target/release/cc-downloader download -h      
 Download files from a crawl
 
-Usage: cc-downloader download [OPTIONS] <PATHS> <DESTINATION> [PROGRESS]
+Usage: cc-downloader download [OPTIONS] <PATHS> <DESTINATION>
 
 Arguments:
   <PATHS>        Path file
   <DESTINATION>  Destination folder
-  [PROGRESS]     Print progress [possible values: true, false]
 
 Options:
-  -n, --numbered                        Enumerate output files for compatibility with Ungoliant Pipeline
+  -f, --files-only                      Download files without the folder structure. This only works for WARC/WET/WAT files
+  -n, --numbered                        Enumerate output files for compatibility with Ungoliant Pipeline. This only works for WET files
   -t, --threads <NUMBER OF THREADS>     Number of threads to use [default: 10]
   -r, --retries <MAX RETRIES PER FILE>  Maximum number of retries per file [default: 1000]
+  -p, --progress                        Print progress
   -h, --help                            Print help
 ```
 
