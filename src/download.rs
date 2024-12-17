@@ -67,6 +67,7 @@ async fn download_task(
     multibar: Arc<MultiProgress>,
     dst: PathBuf,
     numbered: bool,
+    files_only: bool,
     progress: bool,
 ) -> Result<(), DownloadError> {
     // Parse URL into Url type
@@ -91,12 +92,14 @@ async fn download_task(
     };
 
     // Parse the filename from the given URL
-    let filename: &str = match numbered {
-        true => &format!("{}{}", number.to_string(), ".txt.gz"),
-        false => url
-            .path_segments() // Splits into segments of the URL
-            .and_then(|segments| segments.last()) // Retrieves the last segment
-            .unwrap_or("file.download"), // Fallback to generic filename
+    let filename = if numbered {
+        &format!("{}{}", number.to_string(), ".txt.gz")
+    } else if files_only {
+        url.path_segments()
+            .and_then(|segments| segments.last())
+            .unwrap_or("file.download")
+    } else {
+        url.path().strip_prefix("/").unwrap_or("file.download")
     };
 
     let mut dst = dst.clone();
@@ -122,6 +125,13 @@ async fn download_task(
         progress_bar.set_message(filename.to_owned());
     } else {
         println!("Downloading: {}", url.as_str());
+    }
+
+    // Create the directory if it doesn't exist
+    if !numbered {
+        if let Some(parent) = dst.parent() {
+            tokio::fs::create_dir_all(parent).await?;
+        }
     }
 
     // Create the output file with tokio's async fs lib
@@ -166,6 +176,7 @@ pub async fn download(
     threads: usize,
     max_retries: usize,
     numbered: bool,
+    files_only: bool,
     progress: bool,
 ) -> Result<(), DownloadError> {
     // A vector containing all the URLs to download
@@ -229,11 +240,15 @@ pub async fn download(
         let client = client.clone();
         let dst = dst.clone();
         let numbered = numbered.clone();
+        let files_only = files_only.clone();
         let semaphore = semaphore.clone();
         let progress = progress.clone();
         set.spawn(async move {
             let _permit = semaphore.acquire().await;
-            let res = download_task(client, path, number, multibar, dst, numbered, progress).await;
+            let res = download_task(
+                client, path, number, multibar, dst, numbered, files_only, progress,
+            )
+            .await;
             if progress {
                 // Increment the main progress bar.
                 main_pb.inc(1);

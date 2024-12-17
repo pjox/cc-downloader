@@ -27,13 +27,26 @@ async fn main() {
             threads,
             retries,
             numbered,
+            files_only,
         }) => {
-            download::download(path_file, dst, *threads, *retries, *numbered, *progress)
+            if *numbered && *files_only {
+                eprintln!("Numbered and Files Only flags are incompatible");
+            } else {
+                download::download(
+                    path_file,
+                    dst,
+                    *threads,
+                    *retries,
+                    *numbered,
+                    *files_only,
+                    *progress,
+                )
                 .await
                 .expect("Error downloading files");
+            }
         }
         None => {
-            println!("No command specified");
+            eprintln!("No command specified");
         }
     }
 }
