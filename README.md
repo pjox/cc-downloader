@@ -72,4 +72,4 @@ Options:
 
 ## Number of threads
 
-The number of threads can be set using the `-t` flag. The default value is 10. It is advise to use the default value to avoid being blocked by the cloudfront. If you make too many requests in a short period of time, you will satrt receiving `403` errors which are unrecoverable and cannot be retried by the downloader.
+The number of threads can be set using the `-t` flag. The default value is 10. It is advised to use the default value to avoid being blocked by the server. If you make too many requests in a short period of time, you will satrt receiving `403` errors which are unrecoverable and cannot be retried by the downloader.
