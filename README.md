@@ -1,6 +1,6 @@
 # CC-Downloader
 
-This is an experimental polite downloader for Common Crawl data writter in `rust`. Currently it downloads Common Crawl data from the Cloudfront.
+This is an experimental polite downloader for Common Crawl data writter in `rust`. This tool is intended for use outside of AWS.
 
 ## Todo
 
