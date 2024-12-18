@@ -22,7 +22,7 @@ cargo install cc-downloader
 ## Usage
 
 ```text
-➜ ./target/release/cc-downloader -h                                                                               
+➜ cc-downloader -h                                                                               
 A polite and user-friendly downloader for Common Crawl data.
 
 Usage: cc-downloader [COMMAND]
@@ -38,7 +38,7 @@ Options:
 
 ------
 
-➜ ./target/release/cc-downloader download-paths -h
+➜ cc-downloader download-paths -h
 Download paths for a given snapshot
 
 Usage: cc-downloader download-paths <SNAPSHOT> <PATHS> <DESTINATION>
@@ -52,7 +52,7 @@ Options:
   -h, --help  Print help
 ------
 
-➜ ./target/release/cc-downloader download -h      
+➜ cc-downloader download -h      
 Download files from a crawl
 
 Usage: cc-downloader download [OPTIONS] <PATHS> <DESTINATION>
