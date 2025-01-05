@@ -9,6 +9,7 @@ use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::path::PathBuf;
+use std::process;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::io::AsyncWriteExt;
@@ -182,7 +183,13 @@ pub async fn download(
     // A vector containing all the URLs to download
 
     let file = {
-        let gzip_file = File::open(paths)?;
+        let gzip_file = match File::open(paths) {
+            Ok(file) => file,
+            Err(e) => {
+                eprintln!("Could not open file {}\nError: {}", paths.display(), e);
+                process::exit(1)
+            }
+        };
         let file_decoded = GzDecoder::new(gzip_file);
         BufReader::new(file_decoded)
     };

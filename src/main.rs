@@ -16,9 +16,12 @@ async fn main() {
             data_type,
             dst,
         }) => {
-            download::download_paths(snapshot, data_type.as_str(), dst)
-                .await
-                .expect("Error downloading paths");
+            match download::download_paths(snapshot, data_type.as_str(), dst).await {
+                Ok(_) => (),
+                Err(e) => {
+                    eprintln!("Error downloading paths: {}", e);
+                }
+            };
         }
         Some(Commands::Download {
             path_file,
@@ -32,7 +35,7 @@ async fn main() {
             if *numbered && *files_only {
                 eprintln!("Numbered and Files Only flags are incompatible");
             } else {
-                download::download(
+                match download::download(
                     path_file,
                     dst,
                     *threads,
@@ -42,7 +45,12 @@ async fn main() {
                     *progress,
                 )
                 .await
-                .expect("Error downloading files");
+                {
+                    Ok(_) => (),
+                    Err(e) => {
+                        eprintln!("Error downloading paths: {}", e);
+                    }
+                };
             }
         }
         None => {
