@@ -1,6 +1,6 @@
 [package]
 name = "cc-downloader"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 authors = ["Pedro Ortiz Suarez <pedro@commoncrawl.org>"]
 description = "A polite and user-friendly downloader for Common Crawl data."
@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 rust-version = "1.83"
 readme = "README.md"
 homepage = "https://commoncrawl.org"
-repository = "https://github.com/pjox/cc-downloader"
+repository = "https://github.com/commoncrawl/cc-downloader"
 documentation = "https://docs.rs/cc-downloader"
 
 [dependencies]
